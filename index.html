@@ -1,0 +1,2008 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pro Flag Studio - Advanced Flag Creator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+        * { font-family: 'Inter', sans-serif; }
+        
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #1e293b; }
+        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #64748b; }
+        
+        @keyframes wave { 0%, 100% { transform: perspective(500px) rotateY(0deg) skewY(0deg); } 25% { transform: perspective(500px) rotateY(5deg) skewY(2deg); } 50% { transform: perspective(500px) rotateY(0deg) skewY(0deg); } 75% { transform: perspective(500px) rotateY(-5deg) skewY(-2deg); } }
+        @keyframes waveIntense { 0%, 100% { transform: perspective(400px) rotateY(0deg) skewY(0deg) scaleX(1); } 20% { transform: perspective(400px) rotateY(10deg) skewY(4deg) scaleX(0.98); } 50% { transform: perspective(400px) rotateY(0deg) skewY(0deg) scaleX(1); } 80% { transform: perspective(400px) rotateY(-10deg) skewY(-4deg) scaleX(0.98); } }
+        @keyframes waveGentle { 0%, 100% { transform: perspective(600px) rotateY(0deg) skewY(0deg); } 50% { transform: perspective(600px) rotateY(3deg) skewY(1deg); } }
+        @keyframes pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.5); } 50% { box-shadow: 0 0 0 8px rgba(59, 130, 246, 0); } }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+        @keyframes confetti { 0% { transform: translateY(0) rotate(0deg); opacity: 1; } 100% { transform: translateY(400px) rotate(720deg); opacity: 0; } }
+        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+        
+        .flag-wave-normal { animation: wave 3s ease-in-out infinite; transform-origin: left center; }
+        .flag-wave-intense { animation: waveIntense 2s ease-in-out infinite; transform-origin: left center; }
+        .flag-wave-gentle { animation: waveGentle 4s ease-in-out infinite; transform-origin: left center; }
+        
+        .sidebar-btn { transition: all 0.2s; }
+        .sidebar-btn:hover { background: linear-gradient(135deg, #3b82f6, #8b5cf6); transform: scale(1.05); }
+        .sidebar-btn.active { background: linear-gradient(135deg, #3b82f6, #8b5cf6); box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4); }
+        
+        .tool-card { background: linear-gradient(135deg, #1e293b, #334155); border: 1px solid #475569; transition: all 0.3s; }
+        .tool-card:hover { border-color: #3b82f6; box-shadow: 0 4px 20px rgba(59, 130, 246, 0.2); }
+        
+        .element-selected { animation: pulse 2s infinite; outline: 2px dashed #3b82f6; outline-offset: 2px; }
+        
+        .color-btn { transition: all 0.15s; }
+        .color-btn:hover { transform: scale(1.15); box-shadow: 0 0 10px rgba(255,255,255,0.3); }
+        
+        .symbol-btn { transition: all 0.15s; }
+        .symbol-btn:hover { transform: scale(1.2); background: #3b82f6; }
+        
+        .gallery-item { transition: all 0.2s; animation: fadeIn 0.3s; }
+        .gallery-item:hover { transform: scale(1.05); box-shadow: 0 8px 25px rgba(0,0,0,0.3); }
+        
+        .panel-section { animation: slideIn 0.3s ease-out; }
+        
+        .glow-text { text-shadow: 0 0 20px rgba(59, 130, 246, 0.5); }
+        
+        .glass { background: rgba(30, 41, 59, 0.8); backdrop-filter: blur(10px); }
+        
+        .gradient-border { background: linear-gradient(135deg, #3b82f6, #8b5cf6, #ec4899); padding: 2px; }
+        .gradient-border > * { background: #1e293b; }
+        
+        .flag-pole { background: linear-gradient(90deg, #8B7355, #C4A76C, #8B7355); box-shadow: 3px 0 10px rgba(0,0,0,0.4); }
+        .flag-pole-cap { background: linear-gradient(135deg, #ffd700, #ffec8b, #daa520); }
+        
+        .resize-handle { width: 10px; height: 10px; background: #3b82f6; border: 2px solid white; position: absolute; border-radius: 2px; cursor: pointer; }
+        .rotate-handle { width: 14px; height: 14px; background: #22c55e; border: 2px solid white; position: absolute; border-radius: 50%; cursor: grab; top: -25px; left: 50%; transform: translateX(-50%); }
+        
+        .context-menu { animation: fadeIn 0.15s; }
+        
+        input[type="range"] { -webkit-appearance: none; background: linear-gradient(90deg, #475569, #64748b); border-radius: 10px; height: 6px; }
+        input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; background: linear-gradient(135deg, #3b82f6, #8b5cf6); border-radius: 50%; cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.3); }
+        
+        .tooltip { position: relative; }
+        .tooltip::after { content: attr(data-tip); position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); background: #1e293b; color: white; padding: 4px 8px; border-radius: 4px; font-size: 11px; white-space: nowrap; opacity: 0; pointer-events: none; transition: 0.2s; }
+        .tooltip:hover::after { opacity: 1; }
+        
+        .dragging { opacity: 0.7; cursor: grabbing !important; }
+        
+        .confetti-piece { position: fixed; width: 10px; height: 10px; animation: confetti 3s ease-out forwards; pointer-events: none; z-index: 9999; }
+        
+        .modal-backdrop { background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(5px); }
+        
+        .tab-indicator { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 min-h-screen text-white overflow-hidden">
+    <!-- Main App Container -->
+    <div class="flex h-screen">
+        <!-- Left Sidebar - Tools -->
+        <div class="w-16 bg-slate-900/80 border-r border-slate-700 flex flex-col items-center py-4 gap-2">
+            <div class="mb-4">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-xl font-bold shadow-lg">F</div>
+            </div>
+            
+            <button class="sidebar-btn active w-11 h-11 rounded-xl flex items-center justify-center text-xl tooltip" data-panel="layouts" data-tip="Layouts" onclick="showPanel('layouts')">🏴</button>
+            <button class="sidebar-btn w-11 h-11 rounded-xl flex items-center justify-center text-xl tooltip" data-panel="colors" data-tip="Colors" onclick="showPanel('colors')">🎨</button>
+            <button class="sidebar-btn w-11 h-11 rounded-xl flex items-center justify-center text-xl tooltip" data-panel="symbols" data-tip="Symbols" onclick="showPanel('symbols')">⭐</button>
+            <button class="sidebar-btn w-11 h-11 rounded-xl flex items-center justify-center text-xl tooltip" data-panel="custom" data-tip="Custom" onclick="showPanel('custom')">✏️</button>
+            <button class="sidebar-btn w-11 h-11 rounded-xl flex items-center justify-center text-xl tooltip" data-panel="text" data-tip="Text" onclick="showPanel('text')">📝</button>
+            <button class="sidebar-btn w-11 h-11 rounded-xl flex items-center justify-center text-xl tooltip" data-panel="effects" data-tip="Effects" onclick="showPanel('effects')">✨</button>
+            <button class="sidebar-btn w-11 h-11 rounded-xl flex items-center justify-center text-xl tooltip" data-panel="layers" data-tip="Layers" onclick="showPanel('layers')">📚</button>
+            
+            <div class="flex-1"></div>
+            
+            <button class="sidebar-btn w-11 h-11 rounded-xl flex items-center justify-center text-xl tooltip" data-tip="Gallery" onclick="showPanel('gallery')">🖼️</button>
+            <button class="sidebar-btn w-11 h-11 rounded-xl flex items-center justify-center text-xl tooltip" data-tip="Settings" onclick="showPanel('settings')">⚙️</button>
+            <button class="sidebar-btn w-11 h-11 rounded-xl flex items-center justify-center text-xl tooltip" data-tip="Help" onclick="showHelp()">❓</button>
+        </div>
+        
+        <!-- Tools Panel -->
+        <div id="toolsPanel" class="w-80 bg-slate-900/60 border-r border-slate-700 overflow-y-auto">
+            <!-- Layouts Panel -->
+            <div id="panel-layouts" class="panel-section p-4">
+                <h2 class="text-lg font-bold mb-4 flex items-center gap-2">🏴 Flag Layouts</h2>
+                
+                <!-- Preset Layouts -->
+                <div class="mb-4">
+                    <h3 class="text-sm text-slate-400 mb-2 font-medium">Stripe Patterns</h3>
+                    <div class="grid grid-cols-4 gap-2" id="stripeLayouts"></div>
+                </div>
+                
+                <div class="mb-4">
+                    <h3 class="text-sm text-slate-400 mb-2 font-medium">Special Layouts</h3>
+                    <div class="grid grid-cols-4 gap-2" id="specialLayouts"></div>
+                </div>
+                
+                <!-- Custom Layout Builder -->
+                <div class="tool-card rounded-xl p-4 mb-4">
+                    <h3 class="text-sm font-bold mb-3 flex items-center gap-2">🔧 Custom Layout Builder</h3>
+                    <div class="space-y-3">
+                        <div>
+                            <label class="text-xs text-slate-400">Layout Type</label>
+                            <select id="customLayoutType" class="w-full bg-slate-700 rounded-lg px-3 py-2 mt-1 text-sm">
+                                <option value="horizontal">Horizontal Stripes</option>
+                                <option value="vertical">Vertical Stripes</option>
+                                <option value="grid">Grid</option>
+                                <option value="radial">Radial Sectors</option>
+                                <option value="diagonal">Diagonal Stripes</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="text-xs text-slate-400">Number of Sections: <span id="sectionCountVal">3</span></label>
+                            <input type="range" id="sectionCount" min="2" max="12" value="3" class="w-full mt-1">
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="text-xs text-slate-400">Stripe Width %</label>
+                                <input type="number" id="stripeWidth" value="100" min="10" max="200" class="w-full bg-slate-700 rounded-lg px-2 py-1 mt-1 text-sm">
+                            </div>
+                            <div>
+                                <label class="text-xs text-slate-400">Offset %</label>
+                                <input type="number" id="stripeOffset" value="0" min="-50" max="50" class="w-full bg-slate-700 rounded-lg px-2 py-1 mt-1 text-sm">
+                            </div>
+                        </div>
+                        <button onclick="applyCustomLayout()" class="w-full bg-gradient-to-r from-blue-600 to-purple-600 py-2 rounded-lg font-medium hover:opacity-90 transition">Apply Custom Layout</button>
+                    </div>
+                </div>
+                
+                <!-- Aspect Ratio -->
+                <div class="tool-card rounded-xl p-4 mb-4">
+                    <h3 class="text-sm font-bold mb-3">📐 Aspect Ratio</h3>
+                    <div class="grid grid-cols-3 gap-2">
+                        <button onclick="setAspect('3:2')" class="aspect-btn bg-slate-700 hover:bg-blue-600 px-2 py-1.5 rounded text-xs transition">3:2</button>
+                        <button onclick="setAspect('2:1')" class="aspect-btn bg-slate-700 hover:bg-blue-600 px-2 py-1.5 rounded text-xs transition">2:1</button>
+                        <button onclick="setAspect('1:1')" class="aspect-btn bg-slate-700 hover:bg-blue-600 px-2 py-1.5 rounded text-xs transition">1:1</button>
+                        <button onclick="setAspect('5:3')" class="aspect-btn bg-slate-700 hover:bg-blue-600 px-2 py-1.5 rounded text-xs transition">5:3</button>
+                        <button onclick="setAspect('4:3')" class="aspect-btn bg-slate-700 hover:bg-blue-600 px-2 py-1.5 rounded text-xs transition">4:3</button>
+                        <button onclick="setAspect('7:4')" class="aspect-btn bg-slate-700 hover:bg-blue-600 px-2 py-1.5 rounded text-xs transition">7:4</button>
+                    </div>
+                    <div class="mt-3 flex gap-2">
+                        <input type="number" id="customWidth" placeholder="W" class="flex-1 bg-slate-700 rounded px-2 py-1 text-sm" value="3">
+                        <span class="text-slate-400">:</span>
+                        <input type="number" id="customHeight" placeholder="H" class="flex-1 bg-slate-700 rounded px-2 py-1 text-sm" value="2">
+                        <button onclick="setCustomAspect()" class="bg-blue-600 px-3 rounded text-sm">Set</button>
+                    </div>
+                </div>
+                
+                <!-- Country Presets -->
+                <div class="tool-card rounded-xl p-4">
+                    <h3 class="text-sm font-bold mb-3">🌍 Country Presets</h3>
+                    <div class="grid grid-cols-6 gap-1" id="countryPresets"></div>
+                </div>
+            </div>
+            
+            <!-- Colors Panel -->
+            <div id="panel-colors" class="panel-section p-4 hidden">
+                <h2 class="text-lg font-bold mb-4 flex items-center gap-2">🎨 Colors</h2>
+                
+                <div id="colorPickers" class="space-y-2 mb-4"></div>
+                
+                <!-- Quick Colors -->
+                <div class="tool-card rounded-xl p-4 mb-4">
+                    <h3 class="text-sm font-bold mb-3">Quick Colors</h3>
+                    <div class="flex flex-wrap gap-1" id="quickColors"></div>
+                </div>
+                
+                <!-- Color Palettes -->
+                <div class="tool-card rounded-xl p-4 mb-4">
+                    <h3 class="text-sm font-bold mb-3">🎭 Color Palettes</h3>
+                    <div class="space-y-2">
+                        <button onclick="applyPalette(['#c8102e','#ffffff','#012169'])" class="w-full flex gap-1 p-2 bg-slate-700 rounded-lg hover:bg-slate-600 transition">
+                            <span class="w-6 h-6 rounded" style="background:#c8102e"></span>
+                            <span class="w-6 h-6 rounded" style="background:#ffffff"></span>
+                            <span class="w-6 h-6 rounded" style="background:#012169"></span>
+                            <span class="text-xs ml-2">British</span>
+                        </button>
+                        <button onclick="applyPalette(['#009b3a','#fedf00','#002776'])" class="w-full flex gap-1 p-2 bg-slate-700 rounded-lg hover:bg-slate-600 transition">
+                            <span class="w-6 h-6 rounded" style="background:#009b3a"></span>
+                            <span class="w-6 h-6 rounded" style="background:#fedf00"></span>
+                            <span class="w-6 h-6 rounded" style="background:#002776"></span>
+                            <span class="text-xs ml-2">Brazilian</span>
+                        </button>
+                        <button onclick="applyPalette(['#ce1126','#fcd116','#0072c6'])" class="w-full flex gap-1 p-2 bg-slate-700 rounded-lg hover:bg-slate-600 transition">
+                            <span class="w-6 h-6 rounded" style="background:#ce1126"></span>
+                            <span class="w-6 h-6 rounded" style="background:#fcd116"></span>
+                            <span class="w-6 h-6 rounded" style="background:#0072c6"></span>
+                            <span class="text-xs ml-2">Pan-African</span>
+                        </button>
+                        <button onclick="applyPalette(['#ed2939','#ffffff','#002395'])" class="w-full flex gap-1 p-2 bg-slate-700 rounded-lg hover:bg-slate-600 transition">
+                            <span class="w-6 h-6 rounded" style="background:#002395"></span>
+                            <span class="w-6 h-6 rounded" style="background:#ffffff"></span>
+                            <span class="w-6 h-6 rounded" style="background:#ed2939"></span>
+                            <span class="text-xs ml-2">French</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Gradient -->
+                <div class="tool-card rounded-xl p-4">
+                    <h3 class="text-sm font-bold mb-3">🌈 Gradient Mode</h3>
+                    <label class="flex items-center gap-2 mb-3">
+                        <input type="checkbox" id="useGradient" class="w-4 h-4 rounded">
+                        <span class="text-sm">Enable Gradient</span>
+                    </label>
+                    <select id="gradientDirection" class="w-full bg-slate-700 rounded-lg px-3 py-2 text-sm">
+                        <option value="to right">Left → Right</option>
+                        <option value="to left">Right → Left</option>
+                        <option value="to bottom">Top → Bottom</option>
+                        <option value="to top">Bottom → Top</option>
+                        <option value="to bottom right">Diagonal ↘</option>
+                        <option value="to top right">Diagonal ↗</option>
+                        <option value="circle">Radial</option>
+                    </select>
+                </div>
+            </div>
+            
+            <!-- Symbols Panel -->
+            <div id="panel-symbols" class="panel-section p-4 hidden">
+                <h2 class="text-lg font-bold mb-4 flex items-center gap-2">⭐ Symbol Library</h2>
+                
+                <div class="space-y-2 max-h-96 overflow-y-auto mb-4" id="symbolCategories"></div>
+                
+                <!-- Symbol Settings -->
+                <div class="tool-card rounded-xl p-4">
+                    <h3 class="text-sm font-bold mb-3">Symbol Settings</h3>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="text-xs text-slate-400">Color</label>
+                            <input type="color" id="symbolColor" value="#ffffff" class="w-full h-8 rounded cursor-pointer mt-1">
+                        </div>
+                        <div>
+                            <label class="text-xs text-slate-400">Size: <span id="symbolSizeVal">50</span>px</label>
+                            <input type="range" id="symbolSize" min="10" max="200" value="50" class="w-full mt-1">
+                        </div>
+                        <div>
+                            <label class="text-xs text-slate-400">Rotation: <span id="symbolRotVal">0</span>°</label>
+                            <input type="range" id="symbolRotation" min="0" max="360" value="0" class="w-full mt-1">
+                        </div>
+                        <div>
+                            <label class="text-xs text-slate-400">Opacity: <span id="symbolOpacityVal">100</span>%</label>
+                            <input type="range" id="symbolOpacity" min="10" max="100" value="100" class="w-full mt-1">
+                        </div>
+                    </div>
+                    
+                    <div class="mt-3 grid grid-cols-3 gap-2">
+                        <button onclick="addStarCircle(5)" class="bg-slate-700 hover:bg-slate-600 py-1.5 rounded text-xs transition">5★ Circle</button>
+                        <button onclick="addStarCircle(13)" class="bg-slate-700 hover:bg-slate-600 py-1.5 rounded text-xs transition">13★ Circle</button>
+                        <button onclick="addStarGrid(5,4)" class="bg-slate-700 hover:bg-slate-600 py-1.5 rounded text-xs transition">5×4 Grid</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Custom Panel -->
+            <div id="panel-custom" class="panel-section p-4 hidden">
+                <h2 class="text-lg font-bold mb-4 flex items-center gap-2">✏️ Custom Elements</h2>
+                
+                <!-- Custom Symbol Input -->
+                <div class="tool-card rounded-xl p-4 mb-4">
+                    <h3 class="text-sm font-bold mb-3">Type Custom Symbol</h3>
+                    <div class="flex gap-2">
+                        <input type="text" id="customSymbolInput" placeholder="Type emoji or symbol..." class="flex-1 bg-slate-700 rounded-lg px-3 py-2 text-lg" maxlength="4">
+                        <button onclick="addCustomSymbol()" class="bg-blue-600 hover:bg-blue-700 px-4 rounded-lg transition">Add</button>
+                    </div>
+                    <p class="text-xs text-slate-500 mt-2">Tip: Use Win+. or Cmd+Ctrl+Space for emoji picker</p>
+                </div>
+                
+                <!-- Upload Image -->
+                <div class="tool-card rounded-xl p-4 mb-4">
+                    <h3 class="text-sm font-bold mb-3">📁 Upload Image Symbol</h3>
+                    <input type="file" id="imageUpload" accept="image/*" class="hidden" onchange="handleImageUpload(event)">
+                    <button onclick="document.getElementById('imageUpload').click()" class="w-full bg-gradient-to-r from-green-600 to-emerald-600 py-3 rounded-lg font-medium hover:opacity-90 transition flex items-center justify-center gap-2">
+                        <span>📤</span> Upload Image
+                    </button>
+                    <p class="text-xs text-slate-500 mt-2">PNG, JPG, SVG supported. Transparent backgrounds recommended.</p>
+                </div>
+                
+                <!-- Draw Custom Shape -->
+                <div class="tool-card rounded-xl p-4 mb-4">
+                    <h3 class="text-sm font-bold mb-3">🎨 Draw Shape</h3>
+                    <div class="grid grid-cols-4 gap-2 mb-3">
+                        <button onclick="addShape('circle')" class="bg-slate-700 hover:bg-blue-600 p-2 rounded transition flex items-center justify-center">
+                            <div class="w-6 h-6 rounded-full border-2 border-white"></div>
+                        </button>
+                        <button onclick="addShape('square')" class="bg-slate-700 hover:bg-blue-600 p-2 rounded transition flex items-center justify-center">
+                            <div class="w-6 h-6 border-2 border-white"></div>
+                        </button>
+                        <button onclick="addShape('triangle')" class="bg-slate-700 hover:bg-blue-600 p-2 rounded transition flex items-center justify-center">
+                            <div class="w-0 h-0 border-l-[12px] border-l-transparent border-r-[12px] border-r-transparent border-b-[20px] border-b-white"></div>
+                        </button>
+                        <button onclick="addShape('diamond')" class="bg-slate-700 hover:bg-blue-600 p-2 rounded transition flex items-center justify-center">
+                            <div class="w-5 h-5 border-2 border-white rotate-45"></div>
+                        </button>
+                        <button onclick="addShape('pentagon')" class="bg-slate-700 hover:bg-blue-600 p-2 rounded transition text-xs">⬠</button>
+                        <button onclick="addShape('hexagon')" class="bg-slate-700 hover:bg-blue-600 p-2 rounded transition text-xs">⬡</button>
+                        <button onclick="addShape('star5')" class="bg-slate-700 hover:bg-blue-600 p-2 rounded transition text-xs">★</button>
+                        <button onclick="addShape('star6')" class="bg-slate-700 hover:bg-blue-600 p-2 rounded transition text-xs">✡</button>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="text-xs text-slate-400">Fill Color</label>
+                            <input type="color" id="shapeFillColor" value="#ffffff" class="w-full h-8 rounded mt-1">
+                        </div>
+                        <div>
+                            <label class="text-xs text-slate-400">Border Color</label>
+                            <input type="color" id="shapeBorderColor" value="#000000" class="w-full h-8 rounded mt-1">
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Recent Custom Symbols -->
+                <div class="tool-card rounded-xl p-4">
+                    <h3 class="text-sm font-bold mb-3">📌 Recent Custom</h3>
+                    <div id="recentCustom" class="flex flex-wrap gap-2">
+                        <span class="text-slate-500 text-xs">No custom symbols yet</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Text Panel -->
+            <div id="panel-text" class="panel-section p-4 hidden">
+                <h2 class="text-lg font-bold mb-4 flex items-center gap-2">📝 Text</h2>
+                
+                <div class="tool-card rounded-xl p-4 mb-4">
+                    <input type="text" id="textInput" placeholder="Enter text..." class="w-full bg-slate-700 rounded-lg px-3 py-2 mb-3">
+                    
+                    <div class="grid grid-cols-2 gap-3 mb-3">
+                        <div>
+                            <label class="text-xs text-slate-400">Font</label>
+                            <select id="textFont" class="w-full bg-slate-700 rounded px-2 py-1.5 mt-1 text-sm">
+                                <option value="Inter">Inter</option>
+                                <option value="Arial">Arial</option>
+                                <option value="Georgia">Georgia</option>
+                                <option value="Times New Roman">Times</option>
+                                <option value="Impact">Impact</option>
+                                <option value="Courier New">Courier</option>
+                                <option value="Verdana">Verdana</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="text-xs text-slate-400">Color</label>
+                            <input type="color" id="textColor" value="#ffffff" class="w-full h-8 rounded mt-1">
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-3 mb-3">
+                        <div>
+                            <label class="text-xs text-slate-400">Size: <span id="textSizeVal">24</span>px</label>
+                            <input type="range" id="textSize" min="8" max="100" value="24" class="w-full mt-1">
+                        </div>
+                        <div>
+                            <label class="text-xs text-slate-400">Rotation: <span id="textRotVal">0</span>°</label>
+                            <input type="range" id="textRotation" min="-180" max="180" value="0" class="w-full mt-1">
+                        </div>
+                    </div>
+                    
+                    <div class="flex gap-2 mb-3">
+                        <button id="textBoldBtn" onclick="toggleTextStyle('bold')" class="flex-1 bg-slate-700 hover:bg-slate-600 py-1.5 rounded font-bold transition">B</button>
+                        <button id="textItalicBtn" onclick="toggleTextStyle('italic')" class="flex-1 bg-slate-700 hover:bg-slate-600 py-1.5 rounded italic transition">I</button>
+                        <button id="textUnderlineBtn" onclick="toggleTextStyle('underline')" class="flex-1 bg-slate-700 hover:bg-slate-600 py-1.5 rounded underline transition">U</button>
+                        <button id="textStrokeBtn" onclick="toggleTextStyle('stroke')" class="flex-1 bg-slate-700 hover:bg-slate-600 py-1.5 rounded transition" style="text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;">O</button>
+                    </div>
+                    
+                    <button onclick="addText()" class="w-full bg-gradient-to-r from-blue-600 to-purple-600 py-2 rounded-lg font-medium hover:opacity-90 transition">Add Text</button>
+                </div>
+                
+                <!-- Quick Phrases -->
+                <div class="tool-card rounded-xl p-4">
+                    <h3 class="text-sm font-bold mb-3">💬 Quick Phrases</h3>
+                    <div class="flex flex-wrap gap-1">
+                        <button onclick="addQuickText('LIBERTY')" class="bg-slate-700 hover:bg-slate-600 px-2 py-1 rounded text-xs transition">LIBERTY</button>
+                        <button onclick="addQuickText('UNITY')" class="bg-slate-700 hover:bg-slate-600 px-2 py-1 rounded text-xs transition">UNITY</button>
+                        <button onclick="addQuickText('HONOR')" class="bg-slate-700 hover:bg-slate-600 px-2 py-1 rounded text-xs transition">HONOR</button>
+                        <button onclick="addQuickText('PAX')" class="bg-slate-700 hover:bg-slate-600 px-2 py-1 rounded text-xs transition">PAX</button>
+                        <button onclick="addQuickText('VICTORY')" class="bg-slate-700 hover:bg-slate-600 px-2 py-1 rounded text-xs transition">VICTORY</button>
+                        <button onclick="addQuickText('E PLURIBUS UNUM')" class="bg-slate-700 hover:bg-slate-600 px-2 py-1 rounded text-xs transition">E PLURIBUS UNUM</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Effects Panel -->
+            <div id="panel-effects" class="panel-section p-4 hidden">
+                <h2 class="text-lg font-bold mb-4 flex items-center gap-2">✨ Effects</h2>
+                
+                <div class="tool-card rounded-xl p-4 mb-4">
+                    <h3 class="text-sm font-bold mb-3">🖼️ Border</h3>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="text-xs text-slate-400">Width: <span id="borderWidthVal">0</span>px</label>
+                            <input type="range" id="borderWidth" min="0" max="20" value="0" class="w-full mt-1">
+                        </div>
+                        <div>
+                            <label class="text-xs text-slate-400">Color</label>
+                            <input type="color" id="borderColor" value="#000000" class="w-full h-8 rounded mt-1">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="tool-card rounded-xl p-4 mb-4">
+                    <h3 class="text-sm font-bold mb-3">🎚️ Adjustments</h3>
+                    <div class="space-y-3">
+                        <div>
+                            <label class="text-xs text-slate-400">Brightness: <span id="brightnessVal">100</span>%</label>
+                            <input type="range" id="brightness" min="50" max="150" value="100" class="w-full mt-1">
+                        </div>
+                        <div>
+                            <label class="text-xs text-slate-400">Contrast: <span id="contrastVal">100</span>%</label>
+                            <input type="range" id="contrast" min="50" max="150" value="100" class="w-full mt-1">
+                        </div>
+                        <div>
+                            <label class="text-xs text-slate-400">Saturation: <span id="saturationVal">100</span>%</label>
+                            <input type="range" id="saturation" min="0" max="200" value="100" class="w-full mt-1">
+                        </div>
+                        <label class="flex items-center gap-2">
+                            <input type="checkbox" id="vintageEffect" class="w-4 h-4 rounded">
+                            <span class="text-sm">Vintage Effect</span>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="tool-card rounded-xl p-4">
+                    <h3 class="text-sm font-bold mb-3">🎭 Overlays</h3>
+                    <div class="grid grid-cols-4 gap-2">
+                        <button onclick="setOverlay('none')" class="overlay-btn bg-slate-700 hover:bg-slate-600 p-2 rounded text-xs transition">None</button>
+                        <button onclick="setOverlay('stripes')" class="overlay-btn bg-slate-700 hover:bg-slate-600 p-2 rounded text-xs transition">Lines</button>
+                        <button onclick="setOverlay('dots')" class="overlay-btn bg-slate-700 hover:bg-slate-600 p-2 rounded text-xs transition">Dots</button>
+                        <button onclick="setOverlay('grid')" class="overlay-btn bg-slate-700 hover:bg-slate-600 p-2 rounded text-xs transition">Grid</button>
+                        <button onclick="setOverlay('noise')" class="overlay-btn bg-slate-700 hover:bg-slate-600 p-2 rounded text-xs transition">Noise</button>
+                        <button onclick="setOverlay('fabric')" class="overlay-btn bg-slate-700 hover:bg-slate-600 p-2 rounded text-xs transition">Fabric</button>
+                        <button onclick="setOverlay('worn')" class="overlay-btn bg-slate-700 hover:bg-slate-600 p-2 rounded text-xs transition">Worn</button>
+                        <button onclick="setOverlay('vignette')" class="overlay-btn bg-slate-700 hover:bg-slate-600 p-2 rounded text-xs transition">Vignette</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Layers Panel -->
+            <div id="panel-layers" class="panel-section p-4 hidden">
+                <h2 class="text-lg font-bold mb-4 flex items-center gap-2">📚 Layers</h2>
+                <div id="layersList" class="space-y-2"></div>
+                <div class="mt-4 flex gap-2">
+                    <button onclick="bringToFront()" class="flex-1 bg-slate-700 hover:bg-slate-600 py-2 rounded text-sm transition">↑ Front</button>
+                    <button onclick="sendToBack()" class="flex-1 bg-slate-700 hover:bg-slate-600 py-2 rounded text-sm transition">↓ Back</button>
+                </div>
+            </div>
+            
+            <!-- Gallery Panel -->
+            <div id="panel-gallery" class="panel-section p-4 hidden">
+                <h2 class="text-lg font-bold mb-4 flex items-center gap-2">🖼️ My Gallery</h2>
+                
+                <div class="flex gap-2 mb-4">
+                    <button onclick="exportGallery()" class="flex-1 bg-green-600 hover:bg-green-700 py-2 rounded-lg text-sm transition">📤 Export</button>
+                    <button onclick="document.getElementById('importFile').click()" class="flex-1 bg-blue-600 hover:bg-blue-700 py-2 rounded-lg text-sm transition">📥 Import</button>
+                    <input type="file" id="importFile" accept=".json" class="hidden" onchange="importGallery(event)">
+                </div>
+                
+                <div id="galleryGrid" class="grid grid-cols-2 gap-3"></div>
+            </div>
+            
+            <!-- Settings Panel -->
+            <div id="panel-settings" class="panel-section p-4 hidden">
+                <h2 class="text-lg font-bold mb-4 flex items-center gap-2">⚙️ Settings</h2>
+                
+                <div class="tool-card rounded-xl p-4 mb-4">
+                    <h3 class="text-sm font-bold mb-3">🌊 Animation</h3>
+                    <select id="animationStyle" class="w-full bg-slate-700 rounded-lg px-3 py-2">
+                        <option value="normal">Normal Wave</option>
+                        <option value="intense">Intense Wave</option>
+                        <option value="gentle">Gentle Wave</option>
+                        <option value="none">No Animation</option>
+                    </select>
+                </div>
+                
+                <div class="tool-card rounded-xl p-4 mb-4">
+                    <h3 class="text-sm font-bold mb-3">🎯 Snapping</h3>
+                    <label class="flex items-center gap-2 mb-2">
+                        <input type="checkbox" id="snapToGrid" class="w-4 h-4 rounded">
+                        <span class="text-sm">Snap to Grid</span>
+                    </label>
+                    <label class="flex items-center gap-2">
+                        <input type="checkbox" id="snapToCenter" class="w-4 h-4 rounded" checked>
+                        <span class="text-sm">Snap to Center</span>
+                    </label>
+                </div>
+                
+                <div class="tool-card rounded-xl p-4 mb-4">
+                    <h3 class="text-sm font-bold mb-3">⌨️ Keyboard Shortcuts</h3>
+                    <div class="text-xs text-slate-400 space-y-1">
+                        <p><kbd class="bg-slate-700 px-1 rounded">Delete</kbd> - Remove selected</p>
+                        <p><kbd class="bg-slate-700 px-1 rounded">Ctrl+Z</kbd> - Undo</p>
+                        <p><kbd class="bg-slate-700 px-1 rounded">Ctrl+Y</kbd> - Redo</p>
+                        <p><kbd class="bg-slate-700 px-1 rounded">Ctrl+D</kbd> - Duplicate</p>
+                        <p><kbd class="bg-slate-700 px-1 rounded">Ctrl+S</kbd> - Save to gallery</p>
+                    </div>
+                </div>
+                
+                <button onclick="clearAllData()" class="w-full bg-red-600 hover:bg-red-700 py-2 rounded-lg text-sm transition">🗑️ Clear All Data</button>
+            </div>
+        </div>
+        
+        <!-- Main Canvas Area -->
+        <div class="flex-1 flex flex-col">
+            <!-- Top Toolbar -->
+            <div class="h-14 bg-slate-900/60 border-b border-slate-700 flex items-center px-4 gap-3">
+                <button onclick="undo()" class="bg-slate-700 hover:bg-slate-600 px-3 py-1.5 rounded-lg text-sm transition flex items-center gap-1" title="Undo (Ctrl+Z)">↩️ Undo</button>
+                <button onclick="redo()" class="bg-slate-700 hover:bg-slate-600 px-3 py-1.5 rounded-lg text-sm transition flex items-center gap-1" title="Redo (Ctrl+Y)">↪️ Redo</button>
+                
+                <div class="w-px h-6 bg-slate-600"></div>
+                
+                <button onclick="duplicateSelected()" class="bg-slate-700 hover:bg-slate-600 px-3 py-1.5 rounded-lg text-sm transition" title="Duplicate (Ctrl+D)">📋 Duplicate</button>
+                <button onclick="deleteSelected()" class="bg-slate-700 hover:bg-slate-600 px-3 py-1.5 rounded-lg text-sm transition" title="Delete (Del)">🗑️ Delete</button>
+                
+                <div class="w-px h-6 bg-slate-600"></div>
+                
+                <button onclick="randomFlag()" class="bg-gradient-to-r from-purple-600 to-pink-600 hover:opacity-90 px-3 py-1.5 rounded-lg text-sm transition flex items-center gap-1">🎲 Random</button>
+                <button onclick="resetFlag()" class="bg-slate-700 hover:bg-slate-600 px-3 py-1.5 rounded-lg text-sm transition">🔄 Reset</button>
+                
+                <div class="flex-1"></div>
+                
+                <button onclick="saveToGallery()" class="bg-gradient-to-r from-amber-500 to-orange-500 hover:opacity-90 px-4 py-1.5 rounded-lg text-sm font-medium transition flex items-center gap-1">💾 Save</button>
+                <button onclick="exportPNG()" class="bg-gradient-to-r from-green-500 to-emerald-500 hover:opacity-90 px-4 py-1.5 rounded-lg text-sm font-medium transition flex items-center gap-1">📥 PNG</button>
+                <button onclick="exportSVG()" class="bg-gradient-to-r from-blue-500 to-cyan-500 hover:opacity-90 px-4 py-1.5 rounded-lg text-sm font-medium transition flex items-center gap-1">📐 SVG</button>
+            </div>
+            
+            <!-- Canvas -->
+            <div class="flex-1 flex items-center justify-center p-8 overflow-auto" id="canvasArea">
+                <div class="flex items-end">
+                    <!-- Flag Pole -->
+                    <div class="relative">
+                        <div class="flag-pole-cap w-5 h-5 rounded-full absolute -top-2 left-1/2 -translate-x-1/2 shadow-lg"></div>
+                        <div class="flag-pole w-3 rounded-t-full" style="height: 320px;"></div>
+                    </div>
+                    
+                    <!-- Flag -->
+                    <div class="relative" style="filter: drop-shadow(4px 4px 10px rgba(0,0,0,0.4));">
+                        <div id="flagPreview" class="flag-wave-normal relative overflow-hidden cursor-crosshair rounded-r-sm" style="width: 400px; height: 267px; background: #ffffff;">
+                            <!-- Flag content rendered here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Bottom Status Bar -->
+            <div class="h-8 bg-slate-900/60 border-t border-slate-700 flex items-center px-4 text-xs text-slate-400">
+                <span id="statusText">Ready</span>
+                <div class="flex-1"></div>
+                <span id="flagSize">400 × 267</span>
+                <span class="mx-3">|</span>
+                <span id="elementCount">0 elements</span>
+            </div>
+        </div>
+        
+        <!-- Right Properties Panel (appears when element selected) -->
+        <div id="propertiesPanel" class="w-72 bg-slate-900/80 border-l border-slate-700 p-4 hidden">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-lg font-bold">Properties</h2>
+                <button onclick="deselectAll()" class="text-slate-400 hover:text-white">✕</button>
+            </div>
+            
+            <div id="propertiesContent"></div>
+        </div>
+    </div>
+    
+    <!-- Context Menu -->
+    <div id="contextMenu" class="context-menu fixed bg-slate-800 border border-slate-600 rounded-lg shadow-xl py-2 hidden z-50" style="min-width: 160px;">
+        <button onclick="duplicateSelected(); hideContextMenu()" class="w-full text-left px-4 py-2 hover:bg-slate-700 text-sm flex items-center gap-2">📋 Duplicate</button>
+        <button onclick="deleteSelected(); hideContextMenu()" class="w-full text-left px-4 py-2 hover:bg-slate-700 text-sm flex items-center gap-2">🗑️ Delete</button>
+        <div class="border-t border-slate-700 my-1"></div>
+        <button onclick="bringToFront(); hideContextMenu()" class="w-full text-left px-4 py-2 hover:bg-slate-700 text-sm flex items-center gap-2">⬆️ Bring to Front</button>
+        <button onclick="sendToBack(); hideContextMenu()" class="w-full text-left px-4 py-2 hover:bg-slate-700 text-sm flex items-center gap-2">⬇️ Send to Back</button>
+        <div class="border-t border-slate-700 my-1"></div>
+        <button onclick="flipHorizontal(); hideContextMenu()" class="w-full text-left px-4 py-2 hover:bg-slate-700 text-sm flex items-center gap-2">↔️ Flip Horizontal</button>
+        <button onclick="flipVertical(); hideContextMenu()" class="w-full text-left px-4 py-2 hover:bg-slate-700 text-sm flex items-center gap-2">↕️ Flip Vertical</button>
+    </div>
+    
+    <!-- Help Modal -->
+    <div id="helpModal" class="fixed inset-0 modal-backdrop flex items-center justify-center z-50 hidden">
+        <div class="bg-slate-800 rounded-2xl p-6 max-w-lg w-full mx-4 max-h-[80vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold">🚀 Pro Flag Studio Help</h2>
+                <button onclick="hideHelp()" class="text-slate-400 hover:text-white text-2xl">×</button>
+            </div>
+            <div class="space-y-4 text-sm text-slate-300">
+                <div>
+                    <h3 class="font-bold text-white mb-1">Getting Started</h3>
+                    <p>Choose a layout from the left panel, pick colors, and add symbols to create your flag.</p>
+                </div>
+                <div>
+                    <h3 class="font-bold text-white mb-1">Editing Elements</h3>
+                    <p>Click any element on the flag to select it. A properties panel will appear on the right where you can adjust size, color, rotation, and more.</p>
+                </div>
+                <div>
+                    <h3 class="font-bold text-white mb-1">Custom Symbols</h3>
+                    <p>Use the Custom panel to type your own emoji/symbols or upload images to use as symbols.</p>
+                </div>
+                <div>
+                    <h3 class="font-bold text-white mb-1">Gallery</h3>
+                    <p>Your saved flags are stored locally and persist between sessions. Use Export/Import to transfer flags between devices.</p>
+                </div>
+                <div>
+                    <h3 class="font-bold text-white mb-1">Keyboard Shortcuts</h3>
+                    <ul class="list-disc list-inside text-slate-400">
+                        <li>Delete - Remove selected element</li>
+                        <li>Ctrl+Z - Undo</li>
+                        <li>Ctrl+Y - Redo</li>
+                        <li>Ctrl+D - Duplicate selected</li>
+                        <li>Ctrl+S - Save to gallery</li>
+                        <li>Arrow keys - Move selected element</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==================== STATE ====================
+        let state = {
+            layout: 'horizontal-3',
+            colors: ['#dc2626', '#ffffff', '#1d4ed8', '#16a34a', '#fbbf24', '#9333ea', '#000000', '#f97316', '#06b6d4', '#ec4899', '#84cc16', '#f43f5e'],
+            elements: [], // {type, x, y, size, rotation, opacity, color, content, scaleX, scaleY, ...}
+            aspectRatio: '3:2',
+            borderWidth: 0,
+            borderColor: '#000000',
+            brightness: 100,
+            contrast: 100,
+            saturation: 100,
+            vintage: false,
+            overlay: 'none',
+            useGradient: false,
+            gradientDirection: 'to right',
+            customLayout: null
+        };
+        
+        let selectedElement = null;
+        let history = [];
+        let historyIndex = -1;
+        let gallery = [];
+        let recentCustomSymbols = [];
+        let isDragging = false;
+        let dragOffset = { x: 0, y: 0 };
+        
+        // ==================== LAYOUTS ====================
+        const layouts = {
+            'horizontal-2': { type: 'stripes', dir: 'h', count: 2 },
+            'horizontal-3': { type: 'stripes', dir: 'h', count: 3 },
+            'horizontal-4': { type: 'stripes', dir: 'h', count: 4 },
+            'horizontal-5': { type: 'stripes', dir: 'h', count: 5 },
+            'horizontal-6': { type: 'stripes', dir: 'h', count: 6 },
+            'horizontal-7': { type: 'stripes', dir: 'h', count: 7 },
+            'vertical-2': { type: 'stripes', dir: 'v', count: 2 },
+            'vertical-3': { type: 'stripes', dir: 'v', count: 3 },
+            'vertical-4': { type: 'stripes', dir: 'v', count: 4 },
+            'vertical-5': { type: 'stripes', dir: 'v', count: 5 },
+            'nordic': { type: 'nordic', count: 2 },
+            'quarters': { type: 'quarters', count: 4 },
+            'diagonal-down': { type: 'diagonal', dir: 'down', count: 2 },
+            'diagonal-up': { type: 'diagonal', dir: 'up', count: 2 },
+            'canton': { type: 'canton', count: 3 },
+            'circle': { type: 'circle', count: 2 },
+            'triangle': { type: 'triangle', count: 2 },
+            'chevron': { type: 'chevron', count: 2 },
+            'saltire': { type: 'saltire', count: 2 },
+            'cross': { type: 'cross', count: 2 },
+            'y-shape': { type: 'yshape', count: 3 },
+            'diamond': { type: 'diamond', count: 2 },
+            'border': { type: 'border', count: 2 },
+            'rising-sun': { type: 'risingsun', count: 2 },
+            'seychelles': { type: 'seychelles', count: 5 },
+            'greek': { type: 'greek', count: 2 },
+            'benin': { type: 'benin', count: 3 },
+            'plain': { type: 'plain', count: 1 }
+        };
+        
+        const countryPresets = [
+            { name: 'France', emoji: '🇫🇷', layout: 'vertical-3', colors: ['#002395', '#ffffff', '#ed2939'] },
+            { name: 'Germany', emoji: '🇩🇪', layout: 'horizontal-3', colors: ['#000000', '#dd0000', '#ffce00'] },
+            { name: 'Italy', emoji: '🇮🇹', layout: 'vertical-3', colors: ['#009246', '#ffffff', '#ce2b37'] },
+            { name: 'Spain', emoji: '🇪🇸', layout: 'horizontal-3', colors: ['#c60b1e', '#ffc400', '#c60b1e'] },
+            { name: 'UK', emoji: '🇬🇧', layout: 'plain', colors: ['#012169'] },
+            { name: 'USA', emoji: '🇺🇸', layout: 'canton', colors: ['#b22234', '#ffffff', '#3c3b6e'] },
+            { name: 'Japan', emoji: '🇯🇵', layout: 'circle', colors: ['#ffffff', '#bc002d'] },
+            { name: 'Brazil', emoji: '🇧🇷', layout: 'diamond', colors: ['#009c3b', '#ffdf00'] },
+            { name: 'Canada', emoji: '🇨🇦', layout: 'vertical-3', colors: ['#ff0000', '#ffffff', '#ff0000'] },
+            { name: 'Mexico', emoji: '🇲🇽', layout: 'vertical-3', colors: ['#006341', '#ffffff', '#ce1126'] },
+            { name: 'Argentina', emoji: '🇦🇷', layout: 'horizontal-3', colors: ['#74acdf', '#ffffff', '#74acdf'] },
+            { name: 'Sweden', emoji: '🇸🇪', layout: 'nordic', colors: ['#006aa7', '#fecc00'] },
+            { name: 'Norway', emoji: '🇳🇴', layout: 'nordic', colors: ['#ef2b2d', '#002868'] },
+            { name: 'Finland', emoji: '🇫🇮', layout: 'nordic', colors: ['#ffffff', '#003580'] },
+            { name: 'Greece', emoji: '🇬🇷', layout: 'greek', colors: ['#0d5eaf', '#ffffff'] },
+            { name: 'Turkey', emoji: '🇹🇷', layout: 'plain', colors: ['#e30a17'] },
+            { name: 'Russia', emoji: '🇷🇺', layout: 'horizontal-3', colors: ['#ffffff', '#0039a6', '#d52b1e'] },
+            { name: 'China', emoji: '🇨🇳', layout: 'plain', colors: ['#de2910'] },
+            { name: 'India', emoji: '🇮🇳', layout: 'horizontal-3', colors: ['#ff9933', '#ffffff', '#138808'] },
+            { name: 'South Africa', emoji: '🇿🇦', layout: 'yshape', colors: ['#007a4d', '#de3831', '#002395'] },
+            { name: 'Nigeria', emoji: '🇳🇬', layout: 'vertical-3', colors: ['#008751', '#ffffff', '#008751'] },
+            { name: 'Egypt', emoji: '🇪🇬', layout: 'horizontal-3', colors: ['#ce1126', '#ffffff', '#000000'] },
+            { name: 'Australia', emoji: '🇦🇺', layout: 'plain', colors: ['#00008b'] },
+            { name: 'New Zealand', emoji: '🇳🇿', layout: 'plain', colors: ['#00247d'] }
+        ];
+        
+        const symbolCategories = {
+            'Stars ⭐': ['★', '☆', '✦', '✧', '✪', '✫', '✬', '✭', '✮', '✯', '✰', '⭐', '🌟', '💫', '✡', '✴', '✵', '✶', '✷', '✸', '✹', '🔯'],
+            'Celestial 🌙': ['☀', '🌞', '☾', '🌙', '🌛', '🌜', '🌑', '🌕', '☪', '🌍', '🌎', '🌏', '⚫', '⚪', '💧', '🔵', '🟡', '🟠'],
+            'Religious ✝': ['✝', '✞', '✟', '☦', '☨', '☩', '✠', '☥', '✡', '☸', '☯', '☮', '🕉', '☭', '⚛', '卍', '卐', '🛐'],
+            'Animals 🦁': ['🦅', '🦁', '🐉', '🦄', '🐺', '🦌', '🐻', '🦊', '🐯', '🦎', '🐍', '🦂', '🦋', '🐝', '🐬', '🦈', '🐋', '🦢', '🦚', '🦩', '🐎', '🐂', '🦬', '🐘', '🦏', '🐪'],
+            'Nature 🌿': ['🍁', '☘', '🍀', '🌹', '🌸', '🌺', '🌻', '🌲', '🌴', '🌵', '🌾', '🌿', '🍃', '🏔', '🌊', '🔥', '❄', '⚡', '🌈', '☁', '💨'],
+            'Heraldry ⚔': ['⚔', '🗡', '🛡', '⚜', '♔', '♕', '♚', '♛', '👑', '🏰', '⚓', '🎖', '🏹', '⚒', '🔱', '⚙', '🪓', '🏛', '🎺', '📯', '⛓'],
+            'Shapes ◆': ['●', '○', '◆', '◇', '■', '□', '▲', '△', '▼', '▽', '◀', '▶', '❤', '♥', '💎', '💠', '⬟', '⬡', '⬢', '✿', '❀', '❁', '✾'],
+            'Misc 🎯': ['⚡', '💀', '☠', '🎵', '∞', 'Ω', 'α', 'λ', 'π', '⚖', '🎭', '🎪', '🎯', '🚀', '✈', '⚽', '🎸', '🔔', '⏰', '💡', '🔑', '🎁', '✉', '📜']
+        };
+        
+        const quickColors = ['#dc2626', '#ef4444', '#f97316', '#f59e0b', '#eab308', '#84cc16', '#22c55e', '#10b981', '#14b8a6', '#06b6d4', '#0ea5e9', '#3b82f6', '#6366f1', '#8b5cf6', '#a855f7', '#d946ef', '#ec4899', '#f43f5e', '#ffffff', '#e2e8f0', '#94a3b8', '#64748b', '#475569', '#1e293b', '#000000', '#78350f', '#92400e', '#b45309'];
+        
+        // ==================== INITIALIZATION ====================
+        function init() {
+            loadFromStorage();
+            setupUI();
+            setupEventListeners();
+            renderFlag();
+            saveHistory();
+            updateStatus('Ready - Click elements to edit');
+        }
+        
+        function setupUI() {
+            // Stripe layouts
+            const stripeLayouts = document.getElementById('stripeLayouts');
+            ['horizontal-2', 'horizontal-3', 'horizontal-4', 'horizontal-5', 'vertical-2', 'vertical-3', 'vertical-4', 'vertical-5'].forEach(id => {
+                const layout = layouts[id];
+                const btn = document.createElement('button');
+                btn.className = 'layout-btn p-1 bg-slate-700 hover:bg-blue-600 rounded transition aspect-[3/2]';
+                btn.dataset.layout = id;
+                btn.innerHTML = createLayoutPreview(layout);
+                btn.onclick = () => selectLayout(id);
+                stripeLayouts.appendChild(btn);
+            });
+            
+            // Special layouts
+            const specialLayouts = document.getElementById('specialLayouts');
+            ['nordic', 'quarters', 'diagonal-down', 'diagonal-up', 'canton', 'circle', 'triangle', 'chevron', 'saltire', 'cross', 'y-shape', 'diamond', 'border', 'rising-sun', 'seychelles', 'greek', 'benin', 'plain'].forEach(id => {
+                const layout = layouts[id];
+                const btn = document.createElement('button');
+                btn.className = 'layout-btn p-1 bg-slate-700 hover:bg-blue-600 rounded transition aspect-[3/2]';
+                btn.dataset.layout = id;
+                btn.innerHTML = createLayoutPreview(layout);
+                btn.onclick = () => selectLayout(id);
+                specialLayouts.appendChild(btn);
+            });
+            
+            // Country presets
+            const presets = document.getElementById('countryPresets');
+            countryPresets.forEach(p => {
+                const btn = document.createElement('button');
+                btn.className = 'text-xl hover:scale-125 transition p-1';
+                btn.textContent = p.emoji;
+                btn.title = p.name;
+                btn.onclick = () => loadCountryPreset(p);
+                presets.appendChild(btn);
+            });
+            
+            // Quick colors
+            const colorsDiv = document.getElementById('quickColors');
+            quickColors.forEach(c => {
+                const btn = document.createElement('button');
+                btn.className = 'color-btn w-6 h-6 rounded-full border-2 border-white/20';
+                btn.style.background = c;
+                btn.onclick = () => applyQuickColor(c);
+                colorsDiv.appendChild(btn);
+            });
+            
+            // Symbol categories
+            const symCats = document.getElementById('symbolCategories');
+            Object.entries(symbolCategories).forEach(([name, symbols], idx) => {
+                const wrapper = document.createElement('div');
+                wrapper.innerHTML = `
+                    <button class="w-full text-left p-2 bg-slate-700 hover:bg-slate-600 rounded-lg flex justify-between items-center text-sm" onclick="toggleSymbolCat(this)">
+                        <span>${name}</span>
+                        <span class="transform transition ${idx === 0 ? '' : 'rotate-[-90deg]'}">▼</span>
+                    </button>
+                    <div class="grid grid-cols-8 gap-1 p-2 bg-slate-800 rounded-b-lg ${idx === 0 ? '' : 'hidden'}">
+                        ${symbols.map(s => `<button class="symbol-btn text-xl p-1 bg-slate-700 rounded hover:bg-blue-600 transition" onclick="addSymbol('${s}')">${s}</button>`).join('')}
+                    </div>
+                `;
+                symCats.appendChild(wrapper);
+            });
+            
+            renderColorPickers();
+            updateGalleryUI();
+        }
+        
+        function createLayoutPreview(layout) {
+            let html = '<div class="w-full h-full flex ';
+            const colors = ['#dc2626', '#ffffff', '#1d4ed8', '#16a34a', '#fbbf24'];
+            
+            if (layout.type === 'stripes') {
+                html += layout.dir === 'h' ? 'flex-col' : 'flex-row';
+                html += '">';
+                for (let i = 0; i < layout.count; i++) {
+                    html += `<div class="flex-1" style="background:${colors[i % colors.length]}"></div>`;
+                }
+            } else if (layout.type === 'nordic') {
+                html = `<div class="w-full h-full relative" style="background:${colors[0]}"><div class="absolute top-0 bottom-0 left-[28%] w-[15%]" style="background:${colors[1]}"></div><div class="absolute left-0 right-0 top-[38%] h-[24%]" style="background:${colors[1]}"></div></div>`;
+                return html;
+            } else if (layout.type === 'quarters') {
+                html = `<div class="w-full h-full grid grid-cols-2 grid-rows-2"><div style="background:${colors[0]}"></div><div style="background:${colors[1]}"></div><div style="background:${colors[2]}"></div><div style="background:${colors[3]}"></div></div>`;
+                return html;
+            } else if (layout.type === 'circle') {
+                html = `<div class="w-full h-full flex items-center justify-center" style="background:${colors[0]}"><div class="w-1/2 aspect-square rounded-full" style="background:${colors[1]}"></div></div>`;
+                return html;
+            } else if (layout.type === 'diagonal') {
+                const dir = layout.dir === 'down' ? 'to bottom right' : 'to top right';
+                html = `<div class="w-full h-full" style="background:linear-gradient(${dir}, ${colors[0]} 50%, ${colors[1]} 50%)"></div>`;
+                return html;
+            } else if (layout.type === 'plain') {
+                html = `<div class="w-full h-full" style="background:${colors[0]}"></div>`;
+                return html;
+            } else {
+                html += `" style="background:${colors[0]}">`;
+            }
+            
+            html += '</div>';
+            return html;
+        }
+        
+        function setupEventListeners() {
+            const flag = document.getElementById('flagPreview');
+            
+            // Flag click
+            flag.addEventListener('click', (e) => {
+                if (e.target.closest('.flag-element')) {
+                    selectElement(e.target.closest('.flag-element').dataset.idx);
+                } else {
+                    deselectAll();
+                }
+            });
+            
+            // Flag right-click
+            flag.addEventListener('contextmenu', (e) => {
+                e.preventDefault();
+                if (e.target.closest('.flag-element')) {
+                    selectElement(e.target.closest('.flag-element').dataset.idx);
+                    showContextMenu(e.clientX, e.clientY);
+                }
+            });
+            
+            // Global click to hide context menu
+            document.addEventListener('click', () => hideContextMenu());
+            
+            // Keyboard shortcuts
+            document.addEventListener('keydown', (e) => {
+                if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+                
+                if (e.key === 'Delete' || e.key === 'Backspace') {
+                    deleteSelected();
+                } else if (e.ctrlKey && e.key === 'z') {
+                    e.preventDefault();
+                    undo();
+                } else if (e.ctrlKey && e.key === 'y') {
+                    e.preventDefault();
+                    redo();
+                } else if (e.ctrlKey && e.key === 'd') {
+                    e.preventDefault();
+                    duplicateSelected();
+                } else if (e.ctrlKey && e.key === 's') {
+                    e.preventDefault();
+                    saveToGallery();
+                } else if (selectedElement !== null) {
+                    const el = state.elements[selectedElement];
+                    const step = e.shiftKey ? 5 : 1;
+                    if (e.key === 'ArrowUp') { el.y = Math.max(0, el.y - step); renderFlag(); }
+                    if (e.key === 'ArrowDown') { el.y = Math.min(100, el.y + step); renderFlag(); }
+                    if (e.key === 'ArrowLeft') { el.x = Math.max(0, el.x - step); renderFlag(); }
+                    if (e.key === 'ArrowRight') { el.x = Math.min(100, el.x + step); renderFlag(); }
+                }
+            });
+            
+            // Range inputs
+            document.getElementById('sectionCount').oninput = (e) => {
+                document.getElementById('sectionCountVal').textContent = e.target.value;
+            };
+            
+            ['symbolSize', 'symbolRotation', 'symbolOpacity', 'textSize', 'textRotation', 'borderWidth', 'brightness', 'contrast', 'saturation'].forEach(id => {
+                const el = document.getElementById(id);
+                const valEl = document.getElementById(id.replace(/([A-Z])/g, (m) => m) + 'Val') || document.getElementById(id + 'Val');
+                if (el && valEl) {
+                    el.oninput = () => {
+                        valEl.textContent = el.value;
+                        if (['brightness', 'contrast', 'saturation', 'borderWidth'].includes(id)) {
+                            updateEffects();
+                        }
+                    };
+                }
+            });
+            
+            // Effect checkboxes
+            document.getElementById('vintageEffect').onchange = updateEffects;
+            document.getElementById('useGradient').onchange = () => { state.useGradient = document.getElementById('useGradient').checked; renderFlag(); };
+            document.getElementById('gradientDirection').onchange = () => { state.gradientDirection = document.getElementById('gradientDirection').value; renderFlag(); };
+            document.getElementById('borderColor').oninput = updateEffects;
+            
+            // Animation style
+            document.getElementById('animationStyle').onchange = (e) => {
+                const flag = document.getElementById('flagPreview');
+                flag.className = flag.className.replace(/flag-wave-\w+/g, '');
+                if (e.target.value !== 'none') flag.classList.add('flag-wave-' + e.target.value);
+            };
+            
+            // Drag elements
+            flag.addEventListener('mousedown', startDrag);
+            document.addEventListener('mousemove', onDrag);
+            document.addEventListener('mouseup', endDrag);
+        }
+        
+        // ==================== PANELS ====================
+        function showPanel(name) {
+            document.querySelectorAll('.panel-section').forEach(p => p.classList.add('hidden'));
+            document.querySelectorAll('.sidebar-btn').forEach(b => b.classList.remove('active'));
+            
+            const panel = document.getElementById('panel-' + name);
+            if (panel) {
+                panel.classList.remove('hidden');
+            }
+            
+            const btn = document.querySelector(`[data-panel="${name}"]`);
+            if (btn) btn.classList.add('active');
+        }
+        
+        function toggleSymbolCat(btn) {
+            const content = btn.nextElementSibling;
+            const arrow = btn.querySelector('span:last-child');
+            content.classList.toggle('hidden');
+            arrow.classList.toggle('rotate-[-90deg]');
+        }
+        
+        // ==================== LAYOUTS ====================
+        function selectLayout(id) {
+            state.layout = id;
+            state.customLayout = null;
+            document.querySelectorAll('.layout-btn').forEach(b => {
+                b.classList.toggle('ring-2', b.dataset.layout === id);
+                b.classList.toggle('ring-blue-500', b.dataset.layout === id);
+            });
+            renderColorPickers();
+            renderFlag();
+            saveHistory();
+        }
+        
+        function applyCustomLayout() {
+            const type = document.getElementById('customLayoutType').value;
+            const count = parseInt(document.getElementById('sectionCount').value);
+            state.customLayout = { type, count };
+            state.layout = 'custom';
+            renderColorPickers();
+            renderFlag();
+            saveHistory();
+        }
+        
+        function setAspect(ratio) {
+            state.aspectRatio = ratio;
+            updateFlagSize();
+        }
+        
+        function setCustomAspect() {
+            const w = document.getElementById('customWidth').value;
+            const h = document.getElementById('customHeight').value;
+            if (w && h) {
+                state.aspectRatio = `${w}:${h}`;
+                updateFlagSize();
+            }
+        }
+        
+        function updateFlagSize() {
+            const [w, h] = state.aspectRatio.split(':').map(Number);
+            const flag = document.getElementById('flagPreview');
+            const baseWidth = 400;
+            flag.style.width = baseWidth + 'px';
+            flag.style.height = Math.round(baseWidth * h / w) + 'px';
+            document.getElementById('flagSize').textContent = `${baseWidth} × ${Math.round(baseWidth * h / w)}`;
+            renderFlag();
+        }
+        
+        function loadCountryPreset(preset) {
+            state.layout = preset.layout;
+            state.colors = [...preset.colors, ...state.colors.slice(preset.colors.length)];
+            state.elements = [];
+            renderColorPickers();
+            renderFlag();
+            saveHistory();
+            celebrate();
+        }
+        
+        // ==================== COLORS ====================
+        function renderColorPickers() {
+            const layout = layouts[state.layout] || state.customLayout || { count: 3 };
+            const container = document.getElementById('colorPickers');
+            container.innerHTML = '';
+            
+            for (let i = 0; i < Math.min(layout.count, 8); i++) {
+                const div = document.createElement('div');
+                div.className = 'flex items-center gap-2 p-2 bg-slate-800 rounded-lg';
+                div.innerHTML = `
+                    <input type="color" value="${state.colors[i] || '#ffffff'}" class="w-10 h-8 rounded cursor-pointer" data-idx="${i}">
+                    <input type="text" value="${state.colors[i] || '#ffffff'}" class="flex-1 bg-slate-700 px-2 py-1 rounded text-sm uppercase" data-idx="${i}">
+                    <span class="text-xs text-slate-400 w-8">C${i + 1}</span>
+                `;
+                container.appendChild(div);
+                
+                const colorInput = div.querySelector('input[type="color"]');
+                const textInput = div.querySelector('input[type="text"]');
+                
+                colorInput.oninput = (e) => {
+                    state.colors[i] = e.target.value;
+                    textInput.value = e.target.value;
+                    renderFlag();
+                };
+                
+                textInput.oninput = (e) => {
+                    let val = e.target.value;
+                    if (!val.startsWith('#')) val = '#' + val;
+                    if (/^#[0-9A-Fa-f]{6}$/.test(val)) {
+                        state.colors[i] = val;
+                        colorInput.value = val;
+                        renderFlag();
+                    }
+                };
+                
+                colorInput.onfocus = textInput.onfocus = () => {
+                    window.activeColorIndex = i;
+                };
+            }
+        }
+        
+        function applyQuickColor(color) {
+            if (window.activeColorIndex !== undefined) {
+                state.colors[window.activeColorIndex] = color;
+                renderColorPickers();
+                renderFlag();
+            }
+        }
+        
+        function applyPalette(colors) {
+            colors.forEach((c, i) => state.colors[i] = c);
+            renderColorPickers();
+            renderFlag();
+        }
+        
+        // ==================== SYMBOLS & ELEMENTS ====================
+        function addSymbol(char) {
+            const color = document.getElementById('symbolColor').value;
+            const size = parseInt(document.getElementById('symbolSize').value);
+            const rotation = parseInt(document.getElementById('symbolRotation').value);
+            const opacity = parseInt(document.getElementById('symbolOpacity').value);
+            
+            state.elements.push({
+                type: 'symbol',
+                content: char,
+                x: 50,
+                y: 50,
+                size,
+                rotation,
+                opacity,
+                color,
+                scaleX: 1,
+                scaleY: 1
+            });
+            
+            renderFlag();
+            saveHistory();
+            updateStatus(`Added symbol: ${char}`);
+        }
+        
+        function addCustomSymbol() {
+            const input = document.getElementById('customSymbolInput');
+            if (input.value) {
+                addSymbol(input.value);
+                if (!recentCustomSymbols.includes(input.value)) {
+                    recentCustomSymbols.unshift(input.value);
+                    recentCustomSymbols = recentCustomSymbols.slice(0, 20);
+                    updateRecentCustom();
+                }
+                input.value = '';
+            }
+        }
+        
+        function updateRecentCustom() {
+            const container = document.getElementById('recentCustom');
+            if (recentCustomSymbols.length === 0) {
+                container.innerHTML = '<span class="text-slate-500 text-xs">No custom symbols yet</span>';
+            } else {
+                container.innerHTML = recentCustomSymbols.map(s => 
+                    `<button class="symbol-btn text-xl p-1 bg-slate-700 rounded hover:bg-blue-600 transition" onclick="addSymbol('${s}')">${s}</button>`
+                ).join('');
+            }
+        }
+        
+        function handleImageUpload(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    state.elements.push({
+                        type: 'image',
+                        content: event.target.result,
+                        x: 50,
+                        y: 50,
+                        size: 60,
+                        rotation: 0,
+                        opacity: 100,
+                        scaleX: 1,
+                        scaleY: 1
+                    });
+                    renderFlag();
+                    saveHistory();
+                    updateStatus('Image added');
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+        
+        function addShape(shape) {
+            const fill = document.getElementById('shapeFillColor').value;
+            const border = document.getElementById('shapeBorderColor').value;
+            
+            state.elements.push({
+                type: 'shape',
+                shape,
+                x: 50,
+                y: 50,
+                size: 50,
+                rotation: 0,
+                opacity: 100,
+                color: fill,
+                borderColor: border,
+                scaleX: 1,
+                scaleY: 1
+            });
+            
+            renderFlag();
+            saveHistory();
+        }
+        
+        function addText() {
+            const content = document.getElementById('textInput').value || 'TEXT';
+            state.elements.push({
+                type: 'text',
+                content,
+                x: 50,
+                y: 50,
+                size: parseInt(document.getElementById('textSize').value),
+                rotation: parseInt(document.getElementById('textRotation').value),
+                opacity: 100,
+                color: document.getElementById('textColor').value,
+                font: document.getElementById('textFont').value,
+                bold: document.getElementById('textBoldBtn').classList.contains('bg-blue-600'),
+                italic: document.getElementById('textItalicBtn').classList.contains('bg-blue-600'),
+                underline: document.getElementById('textUnderlineBtn').classList.contains('bg-blue-600'),
+                stroke: document.getElementById('textStrokeBtn').classList.contains('bg-blue-600'),
+                scaleX: 1,
+                scaleY: 1
+            });
+            renderFlag();
+            saveHistory();
+        }
+        
+        function addQuickText(text) {
+            document.getElementById('textInput').value = text;
+            addText();
+        }
+        
+        function toggleTextStyle(style) {
+            const btn = document.getElementById('text' + style.charAt(0).toUpperCase() + style.slice(1) + 'Btn');
+            btn.classList.toggle('bg-blue-600');
+            btn.classList.toggle('bg-slate-700');
+        }
+        
+        function addStarCircle(count) {
+            const color = document.getElementById('symbolColor').value;
+            const size = parseInt(document.getElementById('symbolSize').value) / 2;
+            const cx = 50, cy = 50, r = 20;
+            
+            for (let i = 0; i < count; i++) {
+                const angle = (i * 2 * Math.PI / count) - Math.PI / 2;
+                state.elements.push({
+                    type: 'symbol',
+                    content: '★',
+                    x: cx + r * Math.cos(angle),
+                    y: cy + r * Math.sin(angle),
+                    size,
+                    rotation: 0,
+                    opacity: 100,
+                    color,
+                    scaleX: 1,
+                    scaleY: 1
+                });
+            }
+            renderFlag();
+            saveHistory();
+        }
+        
+        function addStarGrid(cols, rows) {
+            const color = document.getElementById('symbolColor').value;
+            const size = parseInt(document.getElementById('symbolSize').value) / 3;
+            
+            for (let r = 0; r < rows; r++) {
+                for (let c = 0; c < cols; c++) {
+                    state.elements.push({
+                        type: 'symbol',
+                        content: '★',
+                        x: 15 + c * (70 / (cols - 1)),
+                        y: 20 + r * (60 / (rows - 1)),
+                        size,
+                        rotation: 0,
+                        opacity: 100,
+                        color,
+                        scaleX: 1,
+                        scaleY: 1
+                    });
+                }
+            }
+            renderFlag();
+            saveHistory();
+        }
+        
+        // ==================== ELEMENT SELECTION ====================
+        function selectElement(idx) {
+            idx = parseInt(idx);
+            selectedElement = idx;
+            renderFlag();
+            showPropertiesPanel();
+        }
+        
+        function deselectAll() {
+            selectedElement = null;
+            renderFlag();
+            hidePropertiesPanel();
+        }
+        
+        function showPropertiesPanel() {
+            const panel = document.getElementById('propertiesPanel');
+            const content = document.getElementById('propertiesContent');
+            panel.classList.remove('hidden');
+            
+            const el = state.elements[selectedElement];
+            if (!el) return;
+            
+            let html = `
+                <div class="space-y-3">
+                    <div class="p-3 bg-slate-800 rounded-lg text-center text-3xl">${el.type === 'image' ? '🖼️' : el.content || el.shape}</div>
+                    
+                    <div>
+                        <label class="text-xs text-slate-400">Position X: ${el.x.toFixed(1)}%</label>
+                        <input type="range" min="0" max="100" value="${el.x}" class="w-full" onchange="updateElement('x', this.value)">
+                    </div>
+                    <div>
+                        <label class="text-xs text-slate-400">Position Y: ${el.y.toFixed(1)}%</label>
+                        <input type="range" min="0" max="100" value="${el.y}" class="w-full" onchange="updateElement('y', this.value)">
+                    </div>
+                    <div>
+                        <label class="text-xs text-slate-400">Size: ${el.size}px</label>
+                        <input type="range" min="10" max="200" value="${el.size}" class="w-full" onchange="updateElement('size', this.value)">
+                    </div>
+                    <div>
+                        <label class="text-xs text-slate-400">Rotation: ${el.rotation}°</label>
+                        <input type="range" min="0" max="360" value="${el.rotation}" class="w-full" onchange="updateElement('rotation', this.value)">
+                    </div>
+                    <div>
+                        <label class="text-xs text-slate-400">Opacity: ${el.opacity}%</label>
+                        <input type="range" min="10" max="100" value="${el.opacity}" class="w-full" onchange="updateElement('opacity', this.value)">
+                    </div>
+                    <div>
+                        <label class="text-xs text-slate-400">Scale X</label>
+                        <input type="range" min="0.5" max="3" step="0.1" value="${el.scaleX || 1}" class="w-full" onchange="updateElement('scaleX', this.value)">
+                    </div>
+                    <div>
+                        <label class="text-xs text-slate-400">Scale Y</label>
+                        <input type="range" min="0.5" max="3" step="0.1" value="${el.scaleY || 1}" class="w-full" onchange="updateElement('scaleY', this.value)">
+                    </div>`;
+            
+            if (el.type !== 'image') {
+                html += `
+                    <div>
+                        <label class="text-xs text-slate-400">Color</label>
+                        <input type="color" value="${el.color}" class="w-full h-10 rounded mt-1" onchange="updateElement('color', this.value)">
+                    </div>`;
+            }
+            
+            if (el.type === 'text') {
+                html += `
+                    <div>
+                        <label class="text-xs text-slate-400">Text</label>
+                        <input type="text" value="${el.content}" class="w-full bg-slate-700 rounded px-2 py-1 mt-1" onchange="updateElement('content', this.value)">
+                    </div>
+                    <div>
+                        <label class="text-xs text-slate-400">Font</label>
+                        <select class="w-full bg-slate-700 rounded px-2 py-1 mt-1" onchange="updateElement('font', this.value)">
+                            <option ${el.font === 'Inter' ? 'selected' : ''}>Inter</option>
+                            <option ${el.font === 'Arial' ? 'selected' : ''}>Arial</option>
+                            <option ${el.font === 'Georgia' ? 'selected' : ''}>Georgia</option>
+                            <option ${el.font === 'Impact' ? 'selected' : ''}>Impact</option>
+                        </select>
+                    </div>`;
+            }
+            
+            html += `
+                <div class="grid grid-cols-2 gap-2 mt-4">
+                    <button onclick="duplicateSelected()" class="bg-blue-600 hover:bg-blue-700 py-2 rounded text-sm">📋 Duplicate</button>
+                    <button onclick="deleteSelected()" class="bg-red-600 hover:bg-red-700 py-2 rounded text-sm">🗑️ Delete</button>
+                </div>
+            </div>`;
+            
+            content.innerHTML = html;
+        }
+        
+        function hidePropertiesPanel() {
+            document.getElementById('propertiesPanel').classList.add('hidden');
+        }
+        
+        function updateElement(prop, value) {
+            if (selectedElement !== null && state.elements[selectedElement]) {
+                const numProps = ['x', 'y', 'size', 'rotation', 'opacity', 'scaleX', 'scaleY'];
+                state.elements[selectedElement][prop] = numProps.includes(prop) ? parseFloat(value) : value;
+                renderFlag();
+                showPropertiesPanel();
+            }
+        }
+        
+        // ==================== ELEMENT ACTIONS ====================
+        function deleteSelected() {
+            if (selectedElement !== null) {
+                state.elements.splice(selectedElement, 1);
+                selectedElement = null;
+                hidePropertiesPanel();
+                renderFlag();
+                saveHistory();
+            }
+        }
+        
+        function duplicateSelected() {
+            if (selectedElement !== null) {
+                const el = { ...state.elements[selectedElement] };
+                el.x += 5;
+                el.y += 5;
+                state.elements.push(el);
+                selectedElement = state.elements.length - 1;
+                renderFlag();
+                saveHistory();
+            }
+        }
+        
+        function bringToFront() {
+            if (selectedElement !== null) {
+                const el = state.elements.splice(selectedElement, 1)[0];
+                state.elements.push(el);
+                selectedElement = state.elements.length - 1;
+                renderFlag();
+                saveHistory();
+            }
+        }
+        
+        function sendToBack() {
+            if (selectedElement !== null) {
+                const el = state.elements.splice(selectedElement, 1)[0];
+                state.elements.unshift(el);
+                selectedElement = 0;
+                renderFlag();
+                saveHistory();
+            }
+        }
+        
+        function flipHorizontal() {
+            if (selectedElement !== null) {
+                state.elements[selectedElement].scaleX *= -1;
+                renderFlag();
+                saveHistory();
+            }
+        }
+        
+        function flipVertical() {
+            if (selectedElement !== null) {
+                state.elements[selectedElement].scaleY *= -1;
+                renderFlag();
+                saveHistory();
+            }
+        }
+        
+        // ==================== DRAG & DROP ====================
+        function startDrag(e) {
+            const el = e.target.closest('.flag-element');
+            if (el) {
+                isDragging = true;
+                selectElement(el.dataset.idx);
+                const flag = document.getElementById('flagPreview');
+                const rect = flag.getBoundingClientRect();
+                dragOffset.x = e.clientX - rect.left - (state.elements[selectedElement].x / 100 * rect.width);
+                dragOffset.y = e.clientY - rect.top - (state.elements[selectedElement].y / 100 * rect.height);
+                el.classList.add('dragging');
+            }
+        }
+        
+        function onDrag(e) {
+            if (isDragging && selectedElement !== null) {
+                const flag = document.getElementById('flagPreview');
+                const rect = flag.getBoundingClientRect();
+                let x = ((e.clientX - rect.left - dragOffset.x) / rect.width) * 100;
+                let y = ((e.clientY - rect.top - dragOffset.y) / rect.height) * 100;
+                
+                // Snap to center
+                if (document.getElementById('snapToCenter').checked) {
+                    if (Math.abs(x - 50) < 3) x = 50;
+                    if (Math.abs(y - 50) < 3) y = 50;
+                }
+                
+                // Snap to grid
+                if (document.getElementById('snapToGrid').checked) {
+                    x = Math.round(x / 5) * 5;
+                    y = Math.round(y / 5) * 5;
+                }
+                
+                state.elements[selectedElement].x = Math.max(0, Math.min(100, x));
+                state.elements[selectedElement].y = Math.max(0, Math.min(100, y));
+                renderFlag();
+                showPropertiesPanel();
+            }
+        }
+        
+        function endDrag() {
+            if (isDragging) {
+                isDragging = false;
+                document.querySelectorAll('.flag-element').forEach(el => el.classList.remove('dragging'));
+                saveHistory();
+            }
+        }
+        
+        // ==================== CONTEXT MENU ====================
+        function showContextMenu(x, y) {
+            const menu = document.getElementById('contextMenu');
+            menu.style.left = x + 'px';
+            menu.style.top = y + 'px';
+            menu.classList.remove('hidden');
+        }
+        
+        function hideContextMenu() {
+            document.getElementById('contextMenu').classList.add('hidden');
+        }
+        
+        // ==================== RENDERING ====================
+        function renderFlag() {
+            const flag = document.getElementById('flagPreview');
+            const layout = layouts[state.layout] || state.customLayout || { type: 'plain', count: 1 };
+            
+            let html = renderLayout(layout);
+            html += renderOverlay();
+            html += renderElements();
+            
+            flag.innerHTML = html;
+            flag.style.border = state.borderWidth > 0 ? `${state.borderWidth}px solid ${state.borderColor}` : 'none';
+            
+            let filters = [];
+            if (state.brightness !== 100) filters.push(`brightness(${state.brightness}%)`);
+            if (state.contrast !== 100) filters.push(`contrast(${state.contrast}%)`);
+            if (state.saturation !== 100) filters.push(`saturate(${state.saturation}%)`);
+            if (state.vintage) filters.push('sepia(30%)');
+            flag.style.filter = filters.join(' ') || 'none';
+            
+            document.getElementById('elementCount').textContent = `${state.elements.length} elements`;
+            updateLayersList();
+        }
+        
+        function renderLayout(layout) {
+            const c = state.colors;
+            
+            switch (layout.type) {
+                case 'stripes':
+                    const dir = layout.dir === 'h' ? 'flex-col' : 'flex-row';
+                    let stripes = `<div class="absolute inset-0 flex ${dir}">`;
+                    for (let i = 0; i < layout.count; i++) {
+                        const bg = state.useGradient && i === 0 
+                            ? `linear-gradient(${state.gradientDirection}, ${c[0]}, ${c[1] || c[0]})`
+                            : c[i] || '#fff';
+                        stripes += `<div class="flex-1" style="background:${bg}"></div>`;
+                    }
+                    return stripes + '</div>';
+                    
+                case 'nordic':
+                    return `<div class="absolute inset-0" style="background:${c[0]}">
+                        <div class="absolute top-0 bottom-0 left-[28%] w-[12%]" style="background:${c[1]}"></div>
+                        <div class="absolute left-0 right-0 top-[40%] h-[20%]" style="background:${c[1]}"></div>
+                    </div>`;
+                    
+                case 'quarters':
+                    return `<div class="absolute inset-0 grid grid-cols-2 grid-rows-2">
+                        <div style="background:${c[0]}"></div>
+                        <div style="background:${c[1]}"></div>
+                        <div style="background:${c[2]}"></div>
+                        <div style="background:${c[3]}"></div>
+                    </div>`;
+                    
+                case 'diagonal':
+                    const gradDir = layout.dir === 'down' ? 'to bottom right' : 'to top right';
+                    return `<div class="absolute inset-0" style="background:linear-gradient(${gradDir}, ${c[0]} 50%, ${c[1]} 50%)"></div>`;
+                    
+                case 'circle':
+                    return `<div class="absolute inset-0 flex items-center justify-center" style="background:${c[0]}">
+                        <div class="w-1/3 aspect-square rounded-full" style="background:${c[1]}"></div>
+                    </div>`;
+                    
+                case 'canton':
+                    return `<div class="absolute inset-0" style="background:${c[0]}">
+                        <div class="absolute inset-y-0 left-0 right-0 flex flex-col">
+                            ${Array(7).fill().map((_, i) => `<div class="flex-1" style="background:${i % 2 === 0 ? c[0] : c[1]}"></div>`).join('')}
+                        </div>
+                        <div class="absolute top-0 left-0 w-2/5 h-[57%]" style="background:${c[2]}"></div>
+                    </div>`;
+                    
+                case 'triangle':
+                    return `<div class="absolute inset-0" style="background:${c[0]}">
+                        <div class="absolute left-0 inset-y-0" style="width:40%;background:${c[1]};clip-path:polygon(0 0, 100% 50%, 0 100%)"></div>
+                    </div>`;
+                    
+                case 'chevron':
+                    return `<div class="absolute inset-0" style="background:${c[0]}">
+                        <div class="absolute left-0 inset-y-0" style="width:35%;background:${c[1]};clip-path:polygon(0 0, 100% 50%, 0 100%)"></div>
+                    </div>`;
+                    
+                case 'saltire':
+                    return `<div class="absolute inset-0" style="background:${c[0]}">
+                        <div class="absolute inset-0" style="background:linear-gradient(45deg, transparent 42%, ${c[1]} 42%, ${c[1]} 58%, transparent 58%), linear-gradient(-45deg, transparent 42%, ${c[1]} 42%, ${c[1]} 58%, transparent 58%)"></div>
+                    </div>`;
+                    
+                case 'cross':
+                    return `<div class="absolute inset-0" style="background:${c[0]}">
+                        <div class="absolute left-[42%] right-[42%] inset-y-0" style="background:${c[1]}"></div>
+                        <div class="absolute top-[35%] bottom-[35%] inset-x-0" style="background:${c[1]}"></div>
+                    </div>`;
+                    
+                case 'yshape':
+                    return `<div class="absolute inset-0" style="background:${c[0]}">
+                        <div class="absolute left-0 top-0 h-1/2 w-1/2" style="background:${c[1]};clip-path:polygon(0 0, 100% 100%, 0 100%)"></div>
+                        <div class="absolute left-0 bottom-0 h-1/2 w-1/2" style="background:${c[2]};clip-path:polygon(0 0, 100% 0, 0 100%)"></div>
+                    </div>`;
+                    
+                case 'diamond':
+                    return `<div class="absolute inset-0 flex items-center justify-center" style="background:${c[0]}">
+                        <div class="w-3/4 h-1/2" style="background:${c[1]};clip-path:polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)"></div>
+                    </div>`;
+                    
+                case 'border':
+                    return `<div class="absolute inset-0 p-4" style="background:${c[0]}">
+                        <div class="w-full h-full" style="background:${c[1]}"></div>
+                    </div>`;
+                    
+                case 'risingsun':
+                    return `<div class="absolute inset-0 flex items-center justify-center overflow-hidden" style="background:${c[0]}">
+                        ${Array(16).fill().map((_, i) => `<div class="absolute w-1 origin-center" style="height:200%;background:${c[1]};transform:rotate(${i * 22.5}deg);opacity:0.4"></div>`).join('')}
+                        <div class="w-1/4 aspect-square rounded-full z-10" style="background:${c[1]}"></div>
+                    </div>`;
+                    
+                case 'seychelles':
+                    return `<div class="absolute inset-0" style="background:conic-gradient(from 180deg at 0% 100%, ${c[0]} 0deg, ${c[1]} 36deg, ${c[2]} 72deg, ${c[3]} 108deg, ${c[4]} 144deg)"></div>`;
+                    
+                case 'greek':
+                    return `<div class="absolute inset-0" style="background:repeating-linear-gradient(180deg, ${c[0]} 0%, ${c[0]} 11.1%, ${c[1]} 11.1%, ${c[1]} 22.2%)">
+                        <div class="absolute top-0 left-0 w-[37%] h-[55%] flex items-center justify-center" style="background:${c[0]}">
+                            <div class="text-white text-4xl font-bold">✚</div>
+                        </div>
+                    </div>`;
+                    
+                case 'benin':
+                    return `<div class="absolute inset-0 flex">
+                        <div class="w-1/3 h-full" style="background:${c[0]}"></div>
+                        <div class="w-2/3 h-full flex flex-col">
+                            <div class="flex-1" style="background:${c[1]}"></div>
+                            <div class="flex-1" style="background:${c[2]}"></div>
+                        </div>
+                    </div>`;
+                    
+                default:
+                    return `<div class="absolute inset-0" style="background:${c[0]}"></div>`;
+            }
+        }
+        
+        function renderOverlay() {
+            if (state.overlay === 'none') return '';
+            
+            const overlays = {
+                stripes: 'background:repeating-linear-gradient(45deg,transparent,transparent 3px,rgba(0,0,0,0.03) 3px,rgba(0,0,0,0.03) 6px)',
+                dots: 'background:radial-gradient(circle,rgba(0,0,0,0.04) 1px,transparent 1px);background-size:6px 6px',
+                grid: 'background:linear-gradient(rgba(0,0,0,0.02) 1px,transparent 1px),linear-gradient(90deg,rgba(0,0,0,0.02) 1px,transparent 1px);background-size:8px 8px',
+                noise: 'opacity:0.1;background:url("data:image/svg+xml,%3Csvg viewBox=\'0 0 200 200\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'n\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.9\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23n)\'/%3E%3C/svg%3E")',
+                fabric: 'background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.015) 2px,rgba(0,0,0,0.015) 4px),repeating-linear-gradient(90deg,transparent,transparent 2px,rgba(0,0,0,0.015) 2px,rgba(0,0,0,0.015) 4px)',
+                worn: 'background:radial-gradient(ellipse at 20% 20%,rgba(255,255,255,0.1) 0%,transparent 50%),radial-gradient(ellipse at 80% 80%,rgba(0,0,0,0.1) 0%,transparent 50%)',
+                vignette: 'background:radial-gradient(ellipse at center,transparent 30%,rgba(0,0,0,0.3) 100%)'
+            };
+            
+            return `<div class="absolute inset-0 pointer-events-none" style="${overlays[state.overlay] || ''}"></div>`;
+        }
+        
+        function renderElements() {
+            return '<div class="absolute inset-0">' + state.elements.map((el, idx) => {
+                const selected = idx === selectedElement;
+                const base = `position:absolute;left:${el.x}%;top:${el.y}%;transform:translate(-50%,-50%) rotate(${el.rotation}deg) scale(${el.scaleX || 1}, ${el.scaleY || 1});opacity:${el.opacity / 100};`;
+                
+                if (el.type === 'symbol') {
+                    return `<div class="flag-element cursor-move ${selected ? 'element-selected' : ''}" data-idx="${idx}" style="${base}font-size:${el.size}px;color:${el.color};text-shadow:1px 1px 2px rgba(0,0,0,0.3)">${el.content}</div>`;
+                } else if (el.type === 'text') {
+                    const fontStyle = `font-family:${el.font};font-weight:${el.bold ? 'bold' : 'normal'};font-style:${el.italic ? 'italic' : 'normal'};text-decoration:${el.underline ? 'underline' : 'none'}`;
+                    const stroke = el.stroke ? `-webkit-text-stroke:1px ${el.color === '#ffffff' ? '#000' : '#fff'}` : '';
+                    return `<div class="flag-element cursor-move ${selected ? 'element-selected' : ''}" data-idx="${idx}" style="${base}font-size:${el.size}px;color:${el.color};${fontStyle};${stroke};text-shadow:1px 1px 3px rgba(0,0,0,0.4)">${el.content}</div>`;
+                } else if (el.type === 'image') {
+                    return `<img class="flag-element cursor-move ${selected ? 'element-selected' : ''}" data-idx="${idx}" src="${el.content}" style="${base}width:${el.size}px;height:auto">`;
+                } else if (el.type === 'shape') {
+                    return renderShape(el, idx, selected, base);
+                }
+                return '';
+            }).join('') + '</div>';
+        }
+        
+        function renderShape(el, idx, selected, base) {
+            const shapes = {
+                circle: `<div class="rounded-full" style="width:${el.size}px;height:${el.size}px;background:${el.color};border:2px solid ${el.borderColor}"></div>`,
+                square: `<div style="width:${el.size}px;height:${el.size}px;background:${el.color};border:2px solid ${el.borderColor}"></div>`,
+                triangle: `<div style="width:0;height:0;border-left:${el.size/2}px solid transparent;border-right:${el.size/2}px solid transparent;border-bottom:${el.size}px solid ${el.color}"></div>`,
+                diamond: `<div style="width:${el.size}px;height:${el.size}px;background:${el.color};transform:rotate(45deg);border:2px solid ${el.borderColor}"></div>`,
+                pentagon: `<div style="width:${el.size}px;height:${el.size}px;background:${el.color};clip-path:polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%)"></div>`,
+                hexagon: `<div style="width:${el.size}px;height:${el.size}px;background:${el.color};clip-path:polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%)"></div>`,
+                star5: `<div style="font-size:${el.size}px;color:${el.color}">★</div>`,
+                star6: `<div style="font-size:${el.size}px;color:${el.color}">✡</div>`
+            };
+            return `<div class="flag-element cursor-move ${selected ? 'element-selected' : ''}" data-idx="${idx}" style="${base}">${shapes[el.shape] || ''}</div>`;
+        }
+        
+        function updateEffects() {
+            state.borderWidth = parseInt(document.getElementById('borderWidth').value);
+            state.borderColor = document.getElementById('borderColor').value;
+            state.brightness = parseInt(document.getElementById('brightness').value);
+            state.contrast = parseInt(document.getElementById('contrast').value);
+            state.saturation = parseInt(document.getElementById('saturation').value);
+            state.vintage = document.getElementById('vintageEffect').checked;
+            renderFlag();
+        }
+        
+        function setOverlay(overlay) {
+            state.overlay = overlay;
+            renderFlag();
+        }
+        
+        function updateLayersList() {
+            const list = document.getElementById('layersList');
+            list.innerHTML = state.elements.length === 0 
+                ? '<p class="text-slate-500 text-sm text-center py-4">No elements yet</p>'
+                : state.elements.map((el, idx) => `
+                    <div class="flex items-center gap-2 p-2 rounded-lg cursor-pointer transition ${idx === selectedElement ? 'bg-blue-600' : 'bg-slate-700 hover:bg-slate-600'}" onclick="selectElement(${idx})">
+                        <span class="text-lg">${el.type === 'image' ? '🖼️' : el.type === 'shape' ? '◆' : el.content?.substring(0, 2) || 'T'}</span>
+                        <span class="text-sm flex-1 truncate">${el.type} ${el.content?.substring(0, 10) || ''}</span>
+                        <button onclick="event.stopPropagation();deleteElementAt(${idx})" class="text-red-400 hover:text-red-300">×</button>
+                    </div>
+                `).reverse().join('');
+        }
+        
+        function deleteElementAt(idx) {
+            state.elements.splice(idx, 1);
+            if (selectedElement === idx) selectedElement = null;
+            renderFlag();
+            saveHistory();
+        }
+        
+        // ==================== HISTORY ====================
+        function saveHistory() {
+            history = history.slice(0, historyIndex + 1);
+            history.push(JSON.stringify(state));
+            historyIndex = history.length - 1;
+            if (history.length > 50) {
+                history.shift();
+                historyIndex--;
+            }
+        }
+        
+        function undo() {
+            if (historyIndex > 0) {
+                historyIndex--;
+                state = JSON.parse(history[historyIndex]);
+                renderColorPickers();
+                renderFlag();
+                updateStatus('Undo');
+            }
+        }
+        
+        function redo() {
+            if (historyIndex < history.length - 1) {
+                historyIndex++;
+                state = JSON.parse(history[historyIndex]);
+                renderColorPickers();
+                renderFlag();
+                updateStatus('Redo');
+            }
+        }
+        
+        // ==================== GALLERY ====================
+        function saveToGallery() {
+            gallery.push(JSON.parse(JSON.stringify(state)));
+            saveToStorage();
+            updateGalleryUI();
+            celebrate();
+            updateStatus('Flag saved to gallery!');
+        }
+        
+        function updateGalleryUI() {
+            const grid = document.getElementById('galleryGrid');
+            grid.innerHTML = gallery.length === 0 
+                ? '<p class="text-slate-500 text-sm text-center col-span-2 py-8">No saved flags yet</p>'
+                : gallery.map((_, idx) => `
+                    <div class="gallery-item bg-slate-700 rounded-xl p-3 cursor-pointer" onclick="loadFromGallery(${idx})">
+                        <div class="aspect-[3/2] bg-slate-600 rounded mb-2 flex items-center justify-center text-2xl">🏴</div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs text-slate-400">Flag ${idx + 1}</span>
+                            <button onclick="event.stopPropagation();deleteFromGallery(${idx})" class="text-red-400 hover:text-red-300 text-sm">🗑️</button>
+                        </div>
+                    </div>
+                `).join('');
+        }
+        
+        function loadFromGallery(idx) {
+            state = JSON.parse(JSON.stringify(gallery[idx]));
+            renderColorPickers();
+            renderFlag();
+            saveHistory();
+            updateStatus('Flag loaded from gallery');
+        }
+        
+        function deleteFromGallery(idx) {
+            gallery.splice(idx, 1);
+            saveToStorage();
+            updateGalleryUI();
+        }
+        
+        function exportGallery() {
+            const data = JSON.stringify({ gallery, recentCustomSymbols }, null, 2);
+            const blob = new Blob([data], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'pro-flag-studio-gallery.json';
+            a.click();
+            URL.revokeObjectURL(url);
+            updateStatus('Gallery exported');
+        }
+        
+        function importGallery(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    try {
+                        const data = JSON.parse(event.target.result);
+                        if (data.gallery) {
+                            gallery = [...gallery, ...data.gallery];
+                            saveToStorage();
+                            updateGalleryUI();
+                            updateStatus(`Imported ${data.gallery.length} flags`);
+                        }
+                        if (data.recentCustomSymbols) {
+                            recentCustomSymbols = [...new Set([...data.recentCustomSymbols, ...recentCustomSymbols])].slice(0, 20);
+                            updateRecentCustom();
+                        }
+                    } catch (err) {
+                        updateStatus('Error importing file');
+                    }
+                };
+                reader.readAsText(file);
+            }
+        }
+        
+        // ==================== STORAGE ====================
+        function saveToStorage() {
+            localStorage.setItem('proFlagStudio', JSON.stringify({ gallery, recentCustomSymbols }));
+        }
+        
+        function loadFromStorage() {
+            try {
+                const data = JSON.parse(localStorage.getItem('proFlagStudio'));
+                if (data) {
+                    gallery = data.gallery || [];
+                    recentCustomSymbols = data.recentCustomSymbols || [];
+                }
+            } catch (e) {}
+        }
+        
+        function clearAllData() {
+            if (confirm('Are you sure you want to delete all saved data?')) {
+                localStorage.removeItem('proFlagStudio');
+                gallery = [];
+                recentCustomSymbols = [];
+                updateGalleryUI();
+                updateRecentCustom();
+                updateStatus('All data cleared');
+            }
+        }
+        
+        // ==================== EXPORT ====================
+        function exportPNG() {
+            const flag = document.getElementById('flagPreview');
+            const canvas = document.createElement('canvas');
+            const [w, h] = state.aspectRatio.split(':').map(Number);
+            canvas.width = 1200;
+            canvas.height = Math.round(1200 * h / w);
+            
+            // Use html2canvas-like approach (simplified)
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = state.colors[0];
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw basic layout
+            drawLayoutToCanvas(ctx, canvas.width, canvas.height);
+            
+            // Draw elements
+            state.elements.forEach(el => {
+                ctx.save();
+                const x = (el.x / 100) * canvas.width;
+                const y = (el.y / 100) * canvas.height;
+                ctx.translate(x, y);
+                ctx.rotate((el.rotation * Math.PI) / 180);
+                ctx.scale(el.scaleX || 1, el.scaleY || 1);
+                ctx.globalAlpha = el.opacity / 100;
+                
+                if (el.type === 'symbol' || el.type === 'text') {
+                    ctx.font = `${el.bold ? 'bold ' : ''}${el.italic ? 'italic ' : ''}${el.size * 3}px ${el.font || 'Arial'}`;
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillStyle = el.color;
+                    ctx.fillText(el.content, 0, 0);
+                }
+                ctx.restore();
+            });
+            
+            const link = document.createElement('a');
+            link.download = 'my-flag.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+            updateStatus('PNG exported');
+        }
+        
+        function drawLayoutToCanvas(ctx, w, h) {
+            const layout = layouts[state.layout] || { type: 'plain' };
+            const c = state.colors;
+            
+            if (layout.type === 'stripes') {
+                const count = layout.count;
+                if (layout.dir === 'h') {
+                    const stripeH = h / count;
+                    for (let i = 0; i < count; i++) {
+                        ctx.fillStyle = c[i] || '#fff';
+                        ctx.fillRect(0, i * stripeH, w, stripeH);
+                    }
+                } else {
+                    const stripeW = w / count;
+                    for (let i = 0; i < count; i++) {
+                        ctx.fillStyle = c[i] || '#fff';
+                        ctx.fillRect(i * stripeW, 0, stripeW, h);
+                    }
+                }
+            } else if (layout.type === 'circle') {
+                ctx.fillStyle = c[0];
+                ctx.fillRect(0, 0, w, h);
+                ctx.fillStyle = c[1];
+                ctx.beginPath();
+                ctx.arc(w/2, h/2, Math.min(w, h) / 6, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+        
+        function exportSVG() {
+            const [w, h] = state.aspectRatio.split(':').map(Number);
+            const width = 400, height = Math.round(400 * h / w);
+            
+            let svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">`;
+            svg += `<rect width="${width}" height="${height}" fill="${state.colors[0]}"/>`;
+            
+            state.elements.forEach(el => {
+                if (el.type === 'symbol' || el.type === 'text') {
+                    const x = (el.x / 100) * width;
+                    const y = (el.y / 100) * height;
+                    svg += `<text x="${x}" y="${y}" font-size="${el.size}" fill="${el.color}" text-anchor="middle" dominant-baseline="middle" transform="rotate(${el.rotation} ${x} ${y})">${el.content}</text>`;
+                }
+            });
+            
+            svg += '</svg>';
+            
+            const blob = new Blob([svg], { type: 'image/svg+xml' });
+            const link = document.createElement('a');
+            link.download = 'my-flag.svg';
+            link.href = URL.createObjectURL(blob);
+            link.click();
+            updateStatus('SVG exported');
+        }
+        
+        // ==================== UTILITIES ====================
+        function randomFlag() {
+            const layoutKeys = Object.keys(layouts);
+            state.layout = layoutKeys[Math.floor(Math.random() * layoutKeys.length)];
+            
+            const colors = quickColors;
+            for (let i = 0; i < 8; i++) {
+                state.colors[i] = colors[Math.floor(Math.random() * colors.length)];
+            }
+            
+            state.elements = [];
+            if (Math.random() > 0.4) {
+                const allSymbols = Object.values(symbolCategories).flat();
+                state.elements.push({
+                    type: 'symbol',
+                    content: allSymbols[Math.floor(Math.random() * allSymbols.length)],
+                    x: 50,
+                    y: 50,
+                    size: 30 + Math.random() * 50,
+                    rotation: 0,
+                    opacity: 100,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    scaleX: 1,
+                    scaleY: 1
+                });
+            }
+            
+            renderColorPickers();
+            renderFlag();
+            saveHistory();
+            celebrate();
+        }
+        
+        function resetFlag() {
+            state = {
+                layout: 'horizontal-3',
+                colors: ['#dc2626', '#ffffff', '#1d4ed8', '#16a34a', '#fbbf24', '#9333ea', '#000000', '#f97316'],
+                elements: [],
+                aspectRatio: '3:2',
+                borderWidth: 0,
+                borderColor: '#000000',
+                brightness: 100,
+                contrast: 100,
+                saturation: 100,
+                vintage: false,
+                overlay: 'none',
+                useGradient: false,
+                gradientDirection: 'to right',
+                customLayout: null
+            };
+            selectedElement = null;
+            hidePropertiesPanel();
+            updateFlagSize();
+            renderColorPickers();
+            renderFlag();
+            saveHistory();
+            updateStatus('Flag reset');
+        }
+        
+        function celebrate() {
+            const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff', '#ff8800', '#8800ff'];
+            for (let i = 0; i < 40; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti-piece';
+                confetti.style.left = Math.random() * 100 + 'vw';
+                confetti.style.top = '-10px';
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.animationDelay = Math.random() * 0.5 + 's';
+                confetti.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
+                document.body.appendChild(confetti);
+                setTimeout(() => confetti.remove(), 3500);
+            }
+        }
+        
+        function updateStatus(text) {
+            document.getElementById('statusText').textContent = text;
+        }
+        
+        function showHelp() {
+            document.getElementById('helpModal').classList.remove('hidden');
+        }
+        
+        function hideHelp() {
+            document.getElementById('helpModal').classList.add('hidden');
+        }
+        
+        // Initialize
+        init();
+    </script>
+</body>
+</html>
